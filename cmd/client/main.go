@@ -18,7 +18,7 @@ func main() {
 	defer con.Close()
 
 	client := desc.NewNoteV1Client(con)
-	res, err := client.CreateNote(context.Background(), &desc.CreateNoteRequest{
+	createRes, err := client.CreateNote(context.Background(), &desc.CreateNoteRequest{
 		Title:  "Wow!",
 		Text:   "I'm stucked",
 		Author: "Tanya",
@@ -28,5 +28,16 @@ func main() {
 		log.Println(err.Error())
 	}
 
-	fmt.Println("Id:", res.Id)
+	fmt.Println("Id:", createRes.Id)
+
+	getRes, err := client.GetNote(context.Background(), &desc.GetNoteRequest{
+		Id: 2,
+	})
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n", getRes.Title, getRes.Text, getRes.Author)
+
 }
