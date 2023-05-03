@@ -3,14 +3,15 @@ package note_v1
 import (
 	"context"
 	"fmt"
+
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (n *Note) GetListNote(cts context.Context, req *desc.GetListNoteRequest) (*desc.GetListNoteResponse, error) {
+func (n *Note) GetList(ctx context.Context, in *emptypb.Empty) (*desc.GetListResponse, error) {
+	fmt.Println("GetList")
 
-	fmt.Println("GetListNote")
-
-	noteList := []*desc.GetNoteResponse{
+	noteList := []*desc.Note{
 		{
 			Title:  "Wow!",
 			Text:   "It's working",
@@ -28,7 +29,7 @@ func (n *Note) GetListNote(cts context.Context, req *desc.GetListNoteRequest) (*
 		},
 	}
 
-	return &desc.GetListNoteResponse{
+	return &desc.GetListResponse{
 		NoteList: noteList,
 	}, nil
 }

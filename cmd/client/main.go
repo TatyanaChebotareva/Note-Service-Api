@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 	"google.golang.org/grpc"
-	"log"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const address = "localhost:50051"
@@ -19,29 +21,33 @@ func main() {
 
 	client := desc.NewNoteV1Client(con)
 
-	createNote(client)
+	//createNote(client)
 	getNote(client)
-	getListNote(client)
-	updateNote(client)
-	deleteNote(client)
+	//getListNote(client)
+	//updateNote(client)
+	//deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
-	createRes, err := client.CreateNote(context.Background(), &desc.CreateNoteRequest{
+	note := desc.Note{
 		Title:  "Wow!",
 		Text:   "It's working",
 		Author: "Tanya",
+	}
+
+	createRes, err := client.Create(context.Background(), &desc.CreateRequest{
+		Note: &note,
 	})
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	fmt.Println("Id:", createRes.Id)
+	fmt.Println("Id:", createRes.GetId())
 }
 
 func getNote(client desc.NoteV1Client) {
-	getRes, err := client.GetNote(context.Background(), &desc.GetNoteRequest{
+	getRes, err := client.Get(context.Background(), &desc.GetRequest{
 		Id: 2,
 	})
 
@@ -49,41 +55,40 @@ func getNote(client desc.NoteV1Client) {
 		log.Println(err.Error())
 	}
 
-	fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n", getRes.Title, getRes.Text, getRes.Author)
+	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\n", getRes.Note.GetTitle(), getRes.Note.GetText(), getRes.Note.GetAuthor())
 }
 
 func getListNote(client desc.NoteV1Client) {
-	getListRes, err := client.GetListNote(context.Background(), &desc.GetListNoteRequest{})
+	getListRes, err := client.GetList(context.Background(), &emptypb.Empty{})
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
 	for _, note := range getListRes.NoteList {
-		fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n\n", note.Title, note.Text, note.Author)
+		fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n\n", note.GetTitle(), note.GetText(), note.GetAuthor())
 	}
 }
 
 func updateNote(client desc.NoteV1Client) {
-	updateRes, err := client.UpdateNote(context.Background(), &desc.UpdateNoteRequest{
-		Id:   2,
-		Text: "25.05.2023"})
+	_, err := client.Update(context.Background(), &desc.UpdateRequest{
+		Id:     2,
+		Title:  "Doctor's visit",
+		Text:   "25.05.2023",
+		Author: "Neboleykin",
+	})
 
 	if err != nil {
 		log.Println(err.Error())
 	}
-
-	fmt.Println(updateRes.Result)
 }
 
 func deleteNote(client desc.NoteV1Client) {
-	deleteRes, err := client.DeleteNote(context.Background(), &desc.DeleteNoteRequest{
+	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
 		Id: 3,
 	})
 
 	if err != nil {
 		log.Println(err.Error())
 	}
-
-	fmt.Println(deleteRes.Result)
 }
