@@ -7,9 +7,9 @@ option go_package = "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 service NoteV1 {
   rpc CreateNote(CreateNoteRequest) returns (CreateNoteResponse);
   rpc GetNote(GetNoteRequest) returns (GetNoteResponse);
-  //  rpc GetListNote(GetListNoteRequest) returns (GetListNoteResponse);
-  //  rpc UpdateNote(UpdateNoteRequest) returns (UpdateNoteResponse);
-  //  rpc DeleteNote(DeleteNoteRequest) returns (DeleteNoteResponse);
+  rpc GetListNote(GetListNoteRequest) returns (GetListNoteResponse);
+  rpc UpdateNote(UpdateNoteRequest) returns (UpdateNoteResponse);
+  rpc DeleteNote(DeleteNoteRequest) returns (DeleteNoteResponse);
 }
 
 message CreateNoteRequest {
@@ -30,4 +30,31 @@ message GetNoteResponse {
   string title = 1;
   string text = 2;
   string author = 3;
+}
+
+message GetListNoteRequest {}
+
+// do we need to return Id?
+message GetListNoteResponse {
+  repeated GetNoteResponse noteList = 1;
+}
+
+// do we need to update other info?
+message UpdateNoteRequest {
+  int64 Id = 1;
+  string Text = 2;
+}
+
+//return update state ok or !ok
+message UpdateNoteResponse {
+  string result = 1;
+}
+
+message DeleteNoteRequest{
+  int64 Id = 1;
+}
+
+//return delete state ok or !ok
+message DeleteNoteResponse {
+  string result = 1;
 }
