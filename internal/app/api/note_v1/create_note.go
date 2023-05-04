@@ -3,16 +3,17 @@ package note_v1
 import (
 	"context"
 	"fmt"
+
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 )
 
-func (n *Note) CreateNote(ctx context.Context, req *desc.CreateNoteRequest) (*desc.CreateNoteResponse, error) {
-	fmt.Println("CreateNote")
-	fmt.Println("title:", req.GetTitle())
-	fmt.Println("text:", req.GetText())
-	fmt.Println("author:", req.GetAuthor())
+func (n *Note) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
+	fmt.Println("Create")
+	fmt.Println("title:", req.Note.GetTitle())
+	fmt.Println("text:", req.Note.GetText())
+	fmt.Println("author:", req.Note.GetAuthor())
 
-	return &desc.CreateNoteResponse{
+	return &desc.CreateResponse{
 		Id: 1,
 	}, nil
 }
