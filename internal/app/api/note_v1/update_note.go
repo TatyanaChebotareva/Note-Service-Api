@@ -11,9 +11,9 @@ import (
 func (n *Note) Update(ctx context.Context, request *desc.UpdateRequest) (*emptypb.Empty, error) {
 	fmt.Println("Update")
 	fmt.Println("Id:", request.GetId())
-	fmt.Println("Title:", request.GetTitle())
-	fmt.Println("Text:", request.GetText())
-	fmt.Println("Author:", request.GetAuthor())
+	fmt.Println("Title:", request.Note.GetTitle())
+	fmt.Println("Text:", request.Note.GetText())
+	fmt.Println("Author:", request.Note.GetAuthor())
 
 	return &emptypb.Empty{}, nil
 }
