@@ -21,17 +21,17 @@ func main() {
 
 	client := desc.NewNoteV1Client(con)
 
-	//createNote(client)
-	//getNote(client)
-	//getListNote(client)
-	updateNote(client)
-	//deleteNote(client)
+	// createNote(client)
+	// getNote(client)
+	getListNote(client)
+	// updateNote(client)
+	// deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
 	note := desc.Note{
-		Title:  "Wow!",
-		Text:   "It's working",
+		Title:  "Final",
+		Text:   "",
 		Author: "Tanya",
 	}
 
@@ -48,7 +48,7 @@ func createNote(client desc.NoteV1Client) {
 
 func getNote(client desc.NoteV1Client) {
 	getRes, err := client.Get(context.Background(), &desc.GetRequest{
-		Id: 2,
+		Id: 3,
 	})
 
 	if err != nil {
@@ -72,13 +72,13 @@ func getListNote(client desc.NoteV1Client) {
 
 func updateNote(client desc.NoteV1Client) {
 	note := desc.Note{
-		Title:  "Doctor's visit",
-		Text:   "25.05.2023",
-		Author: "Neboleykin",
+		Title:  "First note",
+		Text:   "This one was updated",
+		Author: "Tatyana",
 	}
 
 	_, err := client.Update(context.Background(), &desc.UpdateRequest{
-		Id:   2,
+		Id:   1,
 		Note: &note,
 	})
 
@@ -88,8 +88,9 @@ func updateNote(client desc.NoteV1Client) {
 }
 
 func deleteNote(client desc.NoteV1Client) {
+
 	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
-		Id: 3,
+		Id: 2,
 	})
 
 	if err != nil {
