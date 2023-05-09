@@ -11,11 +11,6 @@ import (
 )
 
 func (n *Note) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	fmt.Println("Get")
-	fmt.Println("Id: ", req.GetId())
-
-	note := desc.Note{}
-
 	dbDsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, dbUser, dbPassword, dbName, sslMode,
@@ -29,7 +24,7 @@ func (n *Note) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse
 
 	builder := sq.Select("title, text, author").From(noteTable).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": req.GetId()})
+		Where(sq.Eq{"id": req.GetId()}).Limit(1)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -41,6 +36,8 @@ func (n *Note) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse
 		return nil, err
 	}
 	defer row.Close()
+
+	note := desc.Note{}
 
 	row.Next()
 	err = row.Scan(&note.Title, &note.Text, &note.Author)

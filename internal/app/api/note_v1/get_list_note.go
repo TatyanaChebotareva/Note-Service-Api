@@ -11,11 +11,6 @@ import (
 )
 
 func (n *Note) GetList(ctx context.Context, in *emptypb.Empty) (*desc.GetListResponse, error) {
-	fmt.Println("GetList")
-
-	var noteList []*desc.Note
-	var note *desc.Note
-
 	dbDsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, dbUser, dbPassword, dbName, sslMode,
@@ -40,8 +35,10 @@ func (n *Note) GetList(ctx context.Context, in *emptypb.Empty) (*desc.GetListRes
 	}
 	defer row.Close()
 
+	var noteList []*desc.Note
+
 	for row.Next() {
-		note = new(desc.Note)
+		note := new(desc.Note)
 
 		err = row.Scan(&note.Title, &note.Text, &note.Author)
 		if err != nil {
