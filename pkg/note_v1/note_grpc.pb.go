@@ -8,10 +8,10 @@ package note_v1
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -33,9 +33,9 @@ const (
 type NoteV1Client interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	GetList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetListResponse, error)
-	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListResponse, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type noteV1Client struct {
@@ -64,7 +64,7 @@ func (c *noteV1Client) Get(ctx context.Context, in *GetRequest, opts ...grpc.Cal
 	return out, nil
 }
 
-func (c *noteV1Client) GetList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetListResponse, error) {
+func (c *noteV1Client) GetList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListResponse, error) {
 	out := new(GetListResponse)
 	err := c.cc.Invoke(ctx, NoteV1_GetList_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -73,8 +73,8 @@ func (c *noteV1Client) GetList(ctx context.Context, in *empty.Empty, opts ...grp
 	return out, nil
 }
 
-func (c *noteV1Client) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *noteV1Client) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, NoteV1_Update_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -82,8 +82,8 @@ func (c *noteV1Client) Update(ctx context.Context, in *UpdateRequest, opts ...gr
 	return out, nil
 }
 
-func (c *noteV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *noteV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, NoteV1_Delete_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -97,9 +97,9 @@ func (c *noteV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 type NoteV1Server interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
-	GetList(context.Context, *empty.Empty) (*GetListResponse, error)
-	Update(context.Context, *UpdateRequest) (*empty.Empty, error)
-	Delete(context.Context, *DeleteRequest) (*empty.Empty, error)
+	GetList(context.Context, *emptypb.Empty) (*GetListResponse, error)
+	Update(context.Context, *UpdateRequest) (*emptypb.Empty, error)
+	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedNoteV1Server()
 }
 
@@ -113,13 +113,13 @@ func (UnimplementedNoteV1Server) Create(context.Context, *CreateRequest) (*Creat
 func (UnimplementedNoteV1Server) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedNoteV1Server) GetList(context.Context, *empty.Empty) (*GetListResponse, error) {
+func (UnimplementedNoteV1Server) GetList(context.Context, *emptypb.Empty) (*GetListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
 }
-func (UnimplementedNoteV1Server) Update(context.Context, *UpdateRequest) (*empty.Empty, error) {
+func (UnimplementedNoteV1Server) Update(context.Context, *UpdateRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedNoteV1Server) Delete(context.Context, *DeleteRequest) (*empty.Empty, error) {
+func (UnimplementedNoteV1Server) Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedNoteV1Server) mustEmbedUnimplementedNoteV1Server() {}
@@ -172,7 +172,7 @@ func _NoteV1_Get_Handler(srv interface{}, ctx context.Context, dec func(interfac
 }
 
 func _NoteV1_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func _NoteV1_GetList_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: NoteV1_GetList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NoteV1Server).GetList(ctx, req.(*empty.Empty))
+		return srv.(NoteV1Server).GetList(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

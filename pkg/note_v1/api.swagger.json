@@ -1,0 +1,97 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "note.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/note/v1/create": {
+      "post": {
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/note_v1CreateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/note_v1CreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NoteV1"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "note_v1CreateRequest": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "$ref": "#/definitions/note_v1Note"
+        }
+      }
+    },
+    "note_v1CreateResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "note_v1GetListResponse": {
+      "type": "object",
+      "properties": {
+        "note_list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/note_v1Note"
+          }
+        }
+      }
+    },
+    "note_v1GetResponse": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "$ref": "#/definitions/note_v1Note"
+        }
+      }
+    },
+    "note_v1Note": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

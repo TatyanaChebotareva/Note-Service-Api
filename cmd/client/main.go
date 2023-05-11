@@ -21,9 +21,9 @@ func main() {
 
 	client := desc.NewNoteV1Client(con)
 
-	// createNote(client)
+	createNote(client)
 	// getNote(client)
-	getListNote(client)
+	// getListNote(client)
 	// updateNote(client)
 	// deleteNote(client)
 }
