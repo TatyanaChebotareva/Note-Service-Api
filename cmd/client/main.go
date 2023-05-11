@@ -21,10 +21,10 @@ func main() {
 
 	client := desc.NewNoteV1Client(con)
 
-	createNote(client)
+	// createNote(client)
 	// getNote(client)
 	// getListNote(client)
-	// updateNote(client)
+	updateNote(client)
 	// deleteNote(client)
 }
 
@@ -72,13 +72,13 @@ func getListNote(client desc.NoteV1Client) {
 
 func updateNote(client desc.NoteV1Client) {
 	note := desc.Note{
-		Title:  "First note",
-		Text:   "This one was updated",
+		Title:  "Second note",
+		Text:   "Testing update",
 		Author: "Tatyana",
 	}
 
 	_, err := client.Update(context.Background(), &desc.UpdateRequest{
-		Id:   1,
+		Id:   2,
 		Note: &note,
 	})
 

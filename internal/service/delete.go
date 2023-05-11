@@ -1,4 +1,4 @@
-package note_v1
+package note
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (n *Note) GetList(ctx context.Context, in *emptypb.Empty) (*desc.GetListResponse, error) {
-	res, err := n.noteService.GetList(ctx)
+func (s *Service) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
+	err := s.noteRepository.Delete(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &emptypb.Empty{}, nil
 }

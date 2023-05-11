@@ -56,11 +56,40 @@ func (m *Note) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Title
+	if utf8.RuneCountInString(m.GetTitle()) < 3 {
+		err := NoteValidationError{
+			field:  "Title",
+			reason: "value length must be at least 3 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	// no validation rules for Text
 
-	// no validation rules for Author
+	if utf8.RuneCountInString(m.GetAuthor()) > 25 {
+		err := NoteValidationError{
+			field:  "Author",
+			reason: "value length must be at most 25 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if !_Note_Author_Pattern.MatchString(m.GetAuthor()) {
+		err := NoteValidationError{
+			field:  "Author",
+			reason: "value does not match regex pattern \"([A-Za-z]+$)\"",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return NoteMultiError(errors)
@@ -138,6 +167,8 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = NoteValidationError{}
+
+var _Note_Author_Pattern = regexp.MustCompile("([A-Za-z]+$)")
 
 // Validate checks the field values on CreateRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

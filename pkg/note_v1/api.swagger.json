@@ -40,6 +40,105 @@
           "NoteV1"
         ]
       }
+    },
+    "/note/v1/delete/{id}": {
+      "delete": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "NoteV1"
+        ]
+      }
+    },
+    "/note/v1/get/{id}": {
+      "get": {
+        "operationId": "Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/note_v1GetResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "NoteV1"
+        ]
+      }
+    },
+    "/note/v1/getlist": {
+      "get": {
+        "operationId": "GetList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/note_v1GetListResponse"
+            }
+          }
+        },
+        "tags": [
+          "NoteV1"
+        ]
+      }
+    },
+    "/note/v1/update/{id}": {
+      "put": {
+        "operationId": "Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/note_v1UpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NoteV1"
+        ]
+      }
     }
   },
   "definitions": {
@@ -90,6 +189,18 @@
         },
         "author": {
           "type": "string"
+        }
+      }
+    },
+    "note_v1UpdateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "note": {
+          "$ref": "#/definitions/note_v1Note"
         }
       }
     }
