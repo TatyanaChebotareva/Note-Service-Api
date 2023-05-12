@@ -12,5 +12,5 @@ func (s *Service) Delete(ctx context.Context, req *desc.DeleteRequest) error {
 		return err
 	}
 
-	return nil // delete Empty
+	return nil
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Note = "note"
+	tableName = "note"
 )
 
 type Repository interface {
@@ -34,7 +34,7 @@ func NewNoteRepository(db *sqlx.DB) Repository {
 }
 
 func (r *repository) Create(ctx context.Context, req *desc.CreateRequest) (int64, error) {
-	builder := sq.Insert(Note).
+	builder := sq.Insert(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("title, text, author").
 		Values(req.Note.GetTitle(), req.Note.GetText(), req.Note.GetAuthor()).
@@ -62,9 +62,8 @@ func (r *repository) Create(ctx context.Context, req *desc.CreateRequest) (int64
 }
 
 func (r *repository) Get(ctx context.Context, req *desc.GetRequest) (*desc.Note, error) {
-	builder := sq.Select("id, title, text, author, created_at, updated_at").From(Note).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": req.GetId()}).Limit(1)
+	builder := sq.Select("id, title, text, author, created_at, updated_at").From(tableName).
+		PlaceholderFormat(sq.Dollar).Where(sq.Eq{"id": req.GetId()}).Limit(1)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -100,7 +99,8 @@ func (r *repository) Get(ctx context.Context, req *desc.GetRequest) (*desc.Note,
 }
 
 func (r *repository) GetList(ctx context.Context) ([]*desc.Note, error) {
-	builder := sq.Select("id, title, text, author, created_at, updated_at").From(Note)
+	builder := sq.Select("id, title, text, author, created_at, updated_at").From(tableName).
+		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -142,7 +142,7 @@ func (r *repository) GetList(ctx context.Context) ([]*desc.Note, error) {
 }
 
 func (r *repository) Delete(ctx context.Context, req *desc.DeleteRequest) error {
-	builder := sq.Delete(Note).PlaceholderFormat(sq.Dollar).
+	builder := sq.Delete(tableName).PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": req.GetId()})
 
 	query, args, err := builder.ToSql()
@@ -158,7 +158,7 @@ func (r *repository) Delete(ctx context.Context, req *desc.DeleteRequest) error 
 }
 
 func (r *repository) Update(ctx context.Context, req *desc.UpdateRequest) error {
-	builder := sq.Update(Note).PlaceholderFormat(sq.Dollar).
+	builder := sq.Update(tableName).PlaceholderFormat(sq.Dollar).
 		Set("title", req.Note.GetTitle()).
 		Set("text", req.Note.GetText()).
 		Set("author", req.Note.GetAuthor()).

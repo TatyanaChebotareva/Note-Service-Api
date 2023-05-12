@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/TatyanaChebotareva/Note-Service-Api/internal/app/api/note_v1"
-	note2 "github.com/TatyanaChebotareva/Note-Service-Api/internal/repository/note"
+	noteRepo "github.com/TatyanaChebotareva/Note-Service-Api/internal/repository/note"
 	note "github.com/TatyanaChebotareva/Note-Service-Api/internal/service"
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 	grpcValidator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
@@ -35,17 +35,21 @@ const (
 
 func main() {
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 		startGrpc()
 	}(&wg)
 
-	go func(wg *sync.WaitGroup) {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	go func(wg *sync.WaitGroup, ctx context.Context) {
 		defer wg.Done()
-		startHttp()
-	}(&wg)
+		startHttp(ctx)
+	}(&wg, ctx)
 
 	wg.Wait()
 }
@@ -67,7 +71,7 @@ func startGrpc() error {
 	}
 	defer db.Close()
 
-	noteRepository := note2.NewNoteRepository(db)
+	noteRepository := noteRepo.NewNoteRepository(db)
 	noteService := note.NewService(noteRepository)
 
 	s := grpc.NewServer(
@@ -75,7 +79,7 @@ func startGrpc() error {
 	)
 	desc.RegisterNoteV1Server(s, note_v1.NewNote(noteService))
 
-	fmt.Println("GRPC Server is listening")
+	fmt.Println("GRPC Server is listening on port ", hostGrpc)
 
 	if err = s.Serve(list); err != nil {
 		log.Printf("failed to serve: %s", err.Error())
@@ -85,11 +89,7 @@ func startGrpc() error {
 	return nil
 }
 
-func startHttp() error {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
+func startHttp(ctx context.Context) error {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := desc.RegisterNoteV1HandlerFromEndpoint(ctx, mux, hostGrpc, opts)
@@ -97,7 +97,7 @@ func startHttp() error {
 		return err
 	}
 
-	fmt.Println("HTTP Server is listening")
+	fmt.Println("HTTP Server is listening on port", hostHttp)
 
 	return http.ListenAndServe(hostHttp, mux)
 }
