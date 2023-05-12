@@ -78,7 +78,7 @@ func startGrpc() error {
 	fmt.Println("GRPC Server is listening")
 
 	if err = s.Serve(list); err != nil {
-		log.Fatalf("failed to serve: %s", err.Error())
+		log.Printf("failed to serve: %s", err.Error())
 		return err
 	}
 
