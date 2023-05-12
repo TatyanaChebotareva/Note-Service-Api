@@ -22,14 +22,14 @@ func main() {
 	client := desc.NewNoteV1Client(con)
 
 	// createNote(client)
-	// getNote(client)
-	getListNote(client)
+	getNote(client)
+	// getListNote(client)
 	// updateNote(client)
 	// deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
-	note := desc.Note{
+	note := desc.NoteInfo{
 		Title:  "Final",
 		Text:   "",
 		Author: "Tanya",
@@ -55,7 +55,13 @@ func getNote(client desc.NoteV1Client) {
 		log.Println(err.Error())
 	}
 
-	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\n", getRes.Note.GetTitle(), getRes.Note.GetText(), getRes.Note.GetAuthor())
+	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
+		getRes.Note.NoteInfo.GetTitle(), getRes.Note.NoteInfo.GetText(), getRes.Note.NoteInfo.GetAuthor(),
+		getRes.Note.GetCreatedAt().AsTime())
+
+	if getRes.Note.GetUpdatedAt().IsValid() {
+		fmt.Printf("Updated at: %s\n", getRes.Note.GetUpdatedAt().AsTime())
+	}
 }
 
 func getListNote(client desc.NoteV1Client) {
@@ -65,20 +71,26 @@ func getListNote(client desc.NoteV1Client) {
 		log.Println(err.Error())
 	}
 
-	for _, note := range getListRes.NoteList {
-		fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n\n", note.GetTitle(), note.GetText(), note.GetAuthor())
+	for i := 0; i < len(getListRes.NoteList); i++ {
+		fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
+			getListRes.NoteList[i].NoteInfo.GetTitle(), getListRes.NoteList[i].NoteInfo.GetText(),
+			getListRes.NoteList[i].NoteInfo.GetAuthor(), getListRes.NoteList[i].GetCreatedAt().AsTime())
+		if getListRes.NoteList[i].GetUpdatedAt().IsValid() {
+			fmt.Printf("Updated at: %s\n", getListRes.NoteList[i].GetUpdatedAt().AsTime())
+		}
+		fmt.Println()
 	}
 }
 
 func updateNote(client desc.NoteV1Client) {
-	note := desc.Note{
-		Title:  "First note",
-		Text:   "This one was updated",
+	note := desc.NoteInfo{
+		Title:  "Second note",
+		Text:   "Testing update",
 		Author: "Tatyana",
 	}
 
 	_, err := client.Update(context.Background(), &desc.UpdateRequest{
-		Id:   1,
+		Id:   2,
 		Note: &note,
 	})
 
@@ -88,7 +100,6 @@ func updateNote(client desc.NoteV1Client) {
 }
 
 func deleteNote(client desc.NoteV1Client) {
-
 	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
 		Id: 2,
 	})

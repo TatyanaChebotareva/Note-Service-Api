@@ -3,25 +3,65 @@ syntax = "proto3";
 package api.note_v1;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "validate/validate.proto";
 
 option go_package = "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1";
 
 service NoteV1 {
-  rpc Create(CreateRequest) returns (CreateResponse);
-  rpc Get(GetRequest) returns (GetResponse);
-  rpc GetList(google.protobuf.Empty) returns (GetListResponse);
-  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
-  rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+  rpc Create(CreateRequest) returns (CreateResponse) {
+    option(google.api.http) = {
+      post: "/note/v1/create"
+      body: "*"
+    };
+  }
+
+  rpc Get(GetRequest) returns (GetResponse) {
+    option(google.api.http) = {
+      get: "/note/v1/get/{id}"
+    };
+  }
+
+  rpc GetList(google.protobuf.Empty) returns (GetListResponse) {
+    option(google.api.http) = {
+      get: "/note/v1/getlist"
+    };
+  }
+
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty) {
+    option(google.api.http) = {
+      put: "/note/v1/update/{id}"
+      body: "*"
+    };
+  }
+  
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option(google.api.http) = {
+      delete: "/note/v1/delete/{id}"
+    };
+  }
+}
+
+message NoteInfo {
+  string title = 1 [(validate.rules).string.min_len = 3];
+  string text = 2;
+  string author = 3 [(validate.rules).string = {
+    pattern:   "([A-Za-z]+$)",
+    max_len: 25,
+  }];
+
 }
 
 message Note {
-  string title = 1;
-  string text = 2;
-  string author = 3;
+  int64 id = 1;
+  NoteInfo note_info = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
 message CreateRequest {
-  Note note = 1;
+  NoteInfo note = 1;
 }
 
 message CreateResponse {
@@ -42,7 +82,7 @@ message GetListResponse {
 
 message UpdateRequest {
   int64 id = 1;
-  Note note = 2;
+  NoteInfo note = 2;
 }
 
 message DeleteRequest{
