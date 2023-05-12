@@ -7,12 +7,13 @@ import (
 )
 
 func (s *Service) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	res, err := s.noteRepository.Get(ctx, req)
+	note, time, err := s.noteRepository.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
 	return &desc.GetResponse{
-		Note: res,
+		Note:      note,
+		Timestamp: time,
 	}, nil
 }

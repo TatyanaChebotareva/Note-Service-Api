@@ -9,11 +9,12 @@ import (
 	"sync"
 
 	"github.com/TatyanaChebotareva/Note-Service-Api/internal/app/api/note_v1"
-	"github.com/TatyanaChebotareva/Note-Service-Api/internal/repository"
+	note2 "github.com/TatyanaChebotareva/Note-Service-Api/internal/repository/note"
 	note "github.com/TatyanaChebotareva/Note-Service-Api/internal/service"
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 	grpcValidator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
 )
@@ -34,7 +35,7 @@ const (
 
 func main() {
 	wg := sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(1)
 
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
@@ -50,7 +51,6 @@ func main() {
 }
 
 func startGrpc() error {
-
 	list, err := net.Listen("tcp", hostGrpc)
 	if err != nil {
 		log.Fatalf("failed to mappint port: %s", err.Error())
@@ -67,8 +67,8 @@ func startGrpc() error {
 	}
 	defer db.Close()
 
-	notePerository := repository.NewNoteRepository(db)
-	noteService := note.NewService(notePerository)
+	noteRepository := note2.NewNoteRepository(db)
+	noteService := note.NewService(noteRepository)
 
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(grpcValidator.UnaryServerInterceptor()),
@@ -86,7 +86,6 @@ func startGrpc() error {
 }
 
 func startHttp() error {
-
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

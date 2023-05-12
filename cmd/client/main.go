@@ -23,8 +23,8 @@ func main() {
 
 	// createNote(client)
 	// getNote(client)
-	// getListNote(client)
-	updateNote(client)
+	getListNote(client)
+	// updateNote(client)
 	// deleteNote(client)
 }
 
@@ -55,7 +55,13 @@ func getNote(client desc.NoteV1Client) {
 		log.Println(err.Error())
 	}
 
-	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\n", getRes.Note.GetTitle(), getRes.Note.GetText(), getRes.Note.GetAuthor())
+	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
+		getRes.Note.GetTitle(), getRes.Note.GetText(), getRes.Note.GetAuthor(),
+		getRes.Timestamp.GetCreatedAt().AsTime())
+
+	if getRes.Timestamp.GetUpdatedAt().IsValid() {
+		fmt.Printf("Updated at: %s\n", getRes.Timestamp.GetUpdatedAt().AsTime())
+	}
 }
 
 func getListNote(client desc.NoteV1Client) {
@@ -65,8 +71,14 @@ func getListNote(client desc.NoteV1Client) {
 		log.Println(err.Error())
 	}
 
-	for _, note := range getListRes.NoteList {
-		fmt.Printf("Title: %s\nText: %s\nAuthor:%s\n\n", note.GetTitle(), note.GetText(), note.GetAuthor())
+	for i := 0; i < len(getListRes.NoteList); i++ {
+		fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
+			getListRes.NoteList[i].GetTitle(), getListRes.NoteList[i].GetText(), getListRes.NoteList[i].GetAuthor(),
+			getListRes.TimestampList[i].GetCreatedAt().AsTime())
+		if getListRes.TimestampList[i].GetUpdatedAt().IsValid() {
+			fmt.Printf("Updated at: %s\n", getListRes.TimestampList[i].GetUpdatedAt().AsTime())
+		}
+		fmt.Println()
 	}
 }
 

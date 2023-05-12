@@ -11,10 +11,10 @@ import (
 func (n *Note) Update(ctx context.Context, req *desc.UpdateRequest) (*emptypb.Empty, error) {
 	fmt.Println("Update")
 
-	res, err := n.noteService.Update(ctx, req)
+	err := n.noteService.Update(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &emptypb.Empty{}, nil
 }

@@ -3,6 +3,7 @@ syntax = "proto3";
 package api.note_v1;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "validate/validate.proto";
 
@@ -15,22 +16,26 @@ service NoteV1 {
       body: "*"
     };
   }
+
   rpc Get(GetRequest) returns (GetResponse) {
     option(google.api.http) = {
       get: "/note/v1/get/{id}"
     };
   }
+
   rpc GetList(google.protobuf.Empty) returns (GetListResponse) {
     option(google.api.http) = {
       get: "/note/v1/getlist"
     };
   }
+
   rpc Update(UpdateRequest) returns (google.protobuf.Empty) {
     option(google.api.http) = {
       put: "/note/v1/update/{id}"
       body: "*"
     };
   }
+  
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
     option(google.api.http) = {
       delete: "/note/v1/delete/{id}"
@@ -47,6 +52,11 @@ message Note {
   }];
 }
 
+message Timestamp {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+}
+
 message CreateRequest {
   Note note = 1;
 }
@@ -61,10 +71,12 @@ message GetRequest {
 
 message GetResponse {
   Note note = 1;
+  Timestamp timestamp = 2;
 }
 
 message GetListResponse {
   repeated Note note_list = 1;
+  repeated Timestamp timestamp_list = 2;
 }
 
 message UpdateRequest {
