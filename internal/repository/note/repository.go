@@ -17,8 +17,8 @@ const (
 
 type Repository interface {
 	Create(ctx context.Context, req *desc.CreateRequest) (int64, error)
-	Get(ctx context.Context, req *desc.GetRequest) (*desc.Note, *desc.Timestamp, error)
-	GetList(ctx context.Context) ([]*desc.Note, []*desc.Timestamp, error)
+	Get(ctx context.Context, req *desc.GetRequest) (*desc.Note, error)
+	GetList(ctx context.Context) ([]*desc.Note, error)
 	Delete(ctx context.Context, req *desc.DeleteRequest) error
 	Update(ctx context.Context, req *desc.UpdateRequest) error
 }
@@ -61,80 +61,84 @@ func (r *repository) Create(ctx context.Context, req *desc.CreateRequest) (int64
 	return id, nil
 }
 
-func (r *repository) Get(ctx context.Context, req *desc.GetRequest) (*desc.Note, *desc.Timestamp, error) {
-	builder := sq.Select("title, text, author, created_at, updated_at").From(Note).
+func (r *repository) Get(ctx context.Context, req *desc.GetRequest) (*desc.Note, error) {
+	builder := sq.Select("id, title, text, author, created_at, updated_at").From(Note).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": req.GetId()}).Limit(1)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	row, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer row.Close()
 
 	note := desc.Note{}
-	timestamp := desc.Timestamp{}
+	noteInfo := desc.NoteInfo{}
+
 	var createTime time.Time
 	var updateTime sql.NullTime
 
 	row.Next()
-	err = row.Scan(&note.Title, &note.Text, &note.Author, &createTime, &updateTime)
+	err = row.Scan(&note.Id, &noteInfo.Title, &noteInfo.Text, &noteInfo.Author, &createTime, &updateTime)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	timestamp.CreatedAt = timestamppb.New(createTime)
+	note.CreatedAt = timestamppb.New(createTime)
 	if updateTime.Valid {
-		timestamp.UpdatedAt = timestamppb.New(updateTime.Time)
+		note.UpdatedAt = timestamppb.New(updateTime.Time)
 	}
 
-	return &note, &timestamp, nil
+	note.NoteInfo = &noteInfo
+
+	return &note, nil
 }
 
-func (r *repository) GetList(ctx context.Context) ([]*desc.Note, []*desc.Timestamp, error) {
-	builder := sq.Select("title, text, author, created_at, updated_at").From(Note)
+func (r *repository) GetList(ctx context.Context) ([]*desc.Note, error) {
+	builder := sq.Select("id, title, text, author, created_at, updated_at").From(Note)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	row, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer row.Close()
 
 	var noteList []*desc.Note
-	var timestampList []*desc.Timestamp
 
 	var createTime time.Time
 	var updateTime sql.NullTime
 
 	for row.Next() {
+		noteInfo := new(desc.NoteInfo)
 		note := new(desc.Note)
-		timestamp := new(desc.Timestamp)
 
-		err = row.Scan(&note.Title, &note.Text, &note.Author, &createTime, &updateTime)
+		err = row.Scan(&note.Id, &noteInfo.Title, &noteInfo.Text, &noteInfo.Author, &createTime, &updateTime)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
-		timestamp.CreatedAt = timestamppb.New(createTime)
+		note.CreatedAt = timestamppb.New(createTime)
 		if updateTime.Valid {
-			timestamp.UpdatedAt = timestamppb.New(updateTime.Time)
+			note.UpdatedAt = timestamppb.New(updateTime.Time)
 		}
+
+		note.NoteInfo = noteInfo
 
 		noteList = append(noteList, note)
-		timestampList = append(timestampList, timestamp)
+
 	}
 
-	return noteList, timestampList, nil
+	return noteList, nil
 }
 
 func (r *repository) Delete(ctx context.Context, req *desc.DeleteRequest) error {

@@ -43,22 +43,25 @@ service NoteV1 {
   }
 }
 
-message Note {
+message NoteInfo {
   string title = 1 [(validate.rules).string.min_len = 3];
   string text = 2;
   string author = 3 [(validate.rules).string = {
     pattern:   "([A-Za-z]+$)",
     max_len: 25,
   }];
+
 }
 
-message Timestamp {
-  google.protobuf.Timestamp created_at = 1;
-  google.protobuf.Timestamp updated_at = 2;
+message Note {
+  int64 id = 1;
+  NoteInfo note_info = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
 message CreateRequest {
-  Note note = 1;
+  NoteInfo note = 1;
 }
 
 message CreateResponse {
@@ -71,17 +74,15 @@ message GetRequest {
 
 message GetResponse {
   Note note = 1;
-  Timestamp timestamp = 2;
 }
 
 message GetListResponse {
   repeated Note note_list = 1;
-  repeated Timestamp timestamp_list = 2;
 }
 
 message UpdateRequest {
   int64 id = 1;
-  Note note = 2;
+  NoteInfo note = 2;
 }
 
 message DeleteRequest{

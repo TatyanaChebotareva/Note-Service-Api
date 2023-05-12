@@ -22,14 +22,14 @@ func main() {
 	client := desc.NewNoteV1Client(con)
 
 	// createNote(client)
-	// getNote(client)
-	getListNote(client)
+	getNote(client)
+	// getListNote(client)
 	// updateNote(client)
 	// deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
-	note := desc.Note{
+	note := desc.NoteInfo{
 		Title:  "Final",
 		Text:   "",
 		Author: "Tanya",
@@ -56,11 +56,11 @@ func getNote(client desc.NoteV1Client) {
 	}
 
 	fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
-		getRes.Note.GetTitle(), getRes.Note.GetText(), getRes.Note.GetAuthor(),
-		getRes.Timestamp.GetCreatedAt().AsTime())
+		getRes.Note.NoteInfo.GetTitle(), getRes.Note.NoteInfo.GetText(), getRes.Note.NoteInfo.GetAuthor(),
+		getRes.Note.GetCreatedAt().AsTime())
 
-	if getRes.Timestamp.GetUpdatedAt().IsValid() {
-		fmt.Printf("Updated at: %s\n", getRes.Timestamp.GetUpdatedAt().AsTime())
+	if getRes.Note.GetUpdatedAt().IsValid() {
+		fmt.Printf("Updated at: %s\n", getRes.Note.GetUpdatedAt().AsTime())
 	}
 }
 
@@ -73,17 +73,17 @@ func getListNote(client desc.NoteV1Client) {
 
 	for i := 0; i < len(getListRes.NoteList); i++ {
 		fmt.Printf("Title: %s\nText: %s\nAuthor: %s\nCreated at: %s\n",
-			getListRes.NoteList[i].GetTitle(), getListRes.NoteList[i].GetText(), getListRes.NoteList[i].GetAuthor(),
-			getListRes.TimestampList[i].GetCreatedAt().AsTime())
-		if getListRes.TimestampList[i].GetUpdatedAt().IsValid() {
-			fmt.Printf("Updated at: %s\n", getListRes.TimestampList[i].GetUpdatedAt().AsTime())
+			getListRes.NoteList[i].NoteInfo.GetTitle(), getListRes.NoteList[i].NoteInfo.GetText(),
+			getListRes.NoteList[i].NoteInfo.GetAuthor(), getListRes.NoteList[i].GetCreatedAt().AsTime())
+		if getListRes.NoteList[i].GetUpdatedAt().IsValid() {
+			fmt.Printf("Updated at: %s\n", getListRes.NoteList[i].GetUpdatedAt().AsTime())
 		}
 		fmt.Println()
 	}
 }
 
 func updateNote(client desc.NoteV1Client) {
-	note := desc.Note{
+	note := desc.NoteInfo{
 		Title:  "Second note",
 		Text:   "Testing update",
 		Author: "Tatyana",

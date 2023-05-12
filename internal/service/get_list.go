@@ -7,13 +7,12 @@ import (
 )
 
 func (s *Service) GetList(ctx context.Context) (*desc.GetListResponse, error) {
-	notes, timestamps, err := s.noteRepository.GetList(ctx)
+	notes, err := s.noteRepository.GetList(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &desc.GetListResponse{
-		NoteList:      notes,
-		TimestampList: timestamps,
+		NoteList: notes,
 	}, nil
 }

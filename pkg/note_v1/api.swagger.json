@@ -142,24 +142,11 @@
     }
   },
   "definitions": {
-    "apinote_v1Timestamp": {
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
     "note_v1CreateRequest": {
       "type": "object",
       "properties": {
         "note": {
-          "$ref": "#/definitions/note_v1Note"
+          "$ref": "#/definitions/note_v1NoteInfo"
         }
       }
     },
@@ -180,12 +167,6 @@
           "items": {
             "$ref": "#/definitions/note_v1Note"
           }
-        },
-        "timestamp_list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apinote_v1Timestamp"
-          }
         }
       }
     },
@@ -194,13 +175,30 @@
       "properties": {
         "note": {
           "$ref": "#/definitions/note_v1Note"
-        },
-        "timestamp": {
-          "$ref": "#/definitions/apinote_v1Timestamp"
         }
       }
     },
     "note_v1Note": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "note_info": {
+          "$ref": "#/definitions/note_v1NoteInfo"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "note_v1NoteInfo": {
       "type": "object",
       "properties": {
         "title": {
@@ -222,7 +220,7 @@
           "format": "int64"
         },
         "note": {
-          "$ref": "#/definitions/note_v1Note"
+          "$ref": "#/definitions/note_v1NoteInfo"
         }
       }
     }
