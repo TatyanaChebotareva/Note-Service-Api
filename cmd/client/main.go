@@ -100,7 +100,6 @@ func updateNote(client desc.NoteV1Client) {
 }
 
 func deleteNote(client desc.NoteV1Client) {
-
 	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
 		Id: 2,
 	})
