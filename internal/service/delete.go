@@ -2,12 +2,10 @@ package note
 
 import (
 	"context"
-
-	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 )
 
-func (s *Service) Delete(ctx context.Context, req *desc.DeleteRequest) error {
-	err := s.noteRepository.Delete(ctx, req)
+func (s *Service) Delete(ctx context.Context, id int64) error {
+	err := s.noteRepository.Delete(ctx, id)
 	if err != nil {
 		return err
 	}

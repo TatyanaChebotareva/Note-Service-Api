@@ -6,6 +6,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "google/protobuf/wrappers.proto";
 
 option go_package = "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1";
 
@@ -31,7 +32,7 @@ service NoteV1 {
 
   rpc Update(UpdateRequest) returns (google.protobuf.Empty) {
     option(google.api.http) = {
-      put: "/note/v1/update/{id}"
+      put: "/note/v1/update"
       body: "*"
     };
   }
@@ -50,7 +51,13 @@ message NoteInfo {
     pattern:   "([A-Za-z]+$)",
     max_len: 25,
   }];
+}
 
+message UpdateNoteInfo {
+  int64 id = 1;
+  google.protobuf.StringValue title = 2;
+  google.protobuf.StringValue text = 3;
+  google.protobuf.StringValue author = 4;
 }
 
 message Note {
@@ -81,8 +88,7 @@ message GetListResponse {
 }
 
 message UpdateRequest {
-  int64 id = 1;
-  NoteInfo note = 2;
+  UpdateNoteInfo note = 1;
 }
 
 message DeleteRequest{

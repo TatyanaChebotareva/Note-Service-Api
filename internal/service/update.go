@@ -3,11 +3,11 @@ package note
 import (
 	"context"
 
-	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
+	"github.com/TatyanaChebotareva/Note-Service-Api/internal/model"
 )
 
-func (s *Service) Update(ctx context.Context, req *desc.UpdateRequest) error {
-	err := s.noteRepository.Update(ctx, req)
+func (s *Service) Update(ctx context.Context, noteInfo *model.UpdateNoteInfo) error {
+	err := s.noteRepository.Update(ctx, noteInfo)
 	if err != nil {
 		return err
 	}

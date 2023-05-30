@@ -8,6 +8,7 @@ import (
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 const address = "localhost:50051"
@@ -22,17 +23,17 @@ func main() {
 	client := desc.NewNoteV1Client(con)
 
 	// createNote(client)
-	getNote(client)
+	// getNote(client)
 	// getListNote(client)
-	// updateNote(client)
+	updateNote(client)
 	// deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
 	note := desc.NoteInfo{
-		Title:  "Final",
-		Text:   "",
-		Author: "Tanya",
+		Title:  "For update",
+		Text:   "blablabla",
+		Author: "Tatyana",
 	}
 
 	createRes, err := client.Create(context.Background(), &desc.CreateRequest{
@@ -48,7 +49,7 @@ func createNote(client desc.NoteV1Client) {
 
 func getNote(client desc.NoteV1Client) {
 	getRes, err := client.Get(context.Background(), &desc.GetRequest{
-		Id: 3,
+		Id: 2,
 	})
 
 	if err != nil {
@@ -83,14 +84,14 @@ func getListNote(client desc.NoteV1Client) {
 }
 
 func updateNote(client desc.NoteV1Client) {
-	note := desc.NoteInfo{
-		Title:  "Second note",
-		Text:   "Testing update",
-		Author: "Tatyana",
+	note := desc.UpdateNoteInfo{
+		Id:     5,
+		Title:  wrapperspb.String("Updated note"),
+		Text:   wrapperspb.String("Testing update"),
+		Author: wrapperspb.String("Tatyana update"),
 	}
 
 	_, err := client.Update(context.Background(), &desc.UpdateRequest{
-		Id:   2,
 		Note: &note,
 	})
 
@@ -101,7 +102,7 @@ func updateNote(client desc.NoteV1Client) {
 
 func deleteNote(client desc.NoteV1Client) {
 	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
-		Id: 2,
+		Id: 4,
 	})
 
 	if err != nil {

@@ -107,7 +107,7 @@
         ]
       }
     },
-    "/note/v1/update/{id}": {
+    "/note/v1/update": {
       "put": {
         "operationId": "Update",
         "responses": {
@@ -119,13 +119,6 @@
           }
         },
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
           {
             "name": "body",
             "in": "body",
@@ -212,15 +205,29 @@
         }
       }
     },
-    "note_v1UpdateRequest": {
+    "note_v1UpdateNoteInfo": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "format": "int64"
         },
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        }
+      }
+    },
+    "note_v1UpdateRequest": {
+      "type": "object",
+      "properties": {
         "note": {
-          "$ref": "#/definitions/note_v1NoteInfo"
+          "$ref": "#/definitions/note_v1UpdateNoteInfo"
         }
       }
     }
