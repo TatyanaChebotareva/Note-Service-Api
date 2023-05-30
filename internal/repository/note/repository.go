@@ -139,15 +139,15 @@ func (r *repository) Update(ctx context.Context, req *model.UpdateNoteInfo) erro
 		Where(sq.Eq{"id": req.Id})
 
 	if req.Title.Valid {
-		builder.Set("title", req.Title.String)
+		builder = builder.Set("title", req.Title.String)
 	}
 
 	if req.Text.Valid {
-		builder.Set("text", req.Text.String)
+		builder = builder.Set("text", req.Text.String)
 	}
 
 	if req.Author.Valid {
-		builder.Set("author", req.Author.String)
+		builder = builder.Set("author", req.Author.String)
 	}
 
 	query, args, err := builder.ToSql()
