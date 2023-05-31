@@ -11,7 +11,7 @@ import (
 func (n *Note) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
 	fmt.Println("Delete")
 
-	err := n.noteService.Delete(ctx, req)
+	err := n.noteService.Delete(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
