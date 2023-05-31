@@ -42,21 +42,21 @@ func (a *App) Run() error {
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
-	go func(wg *sync.WaitGroup) {
+	go func() {
 		defer wg.Done()
 		err := a.runGRPC()
 		if err != nil {
 			log.Fatalf("Failed to process gRPC server: %s", err.Error())
 		}
-	}(wg)
+	}()
 
-	go func(wg *sync.WaitGroup) {
+	go func() {
 		defer wg.Done()
 		err := a.runPublicHTTP()
 		if err != nil {
 			log.Fatalf("Failed to process muxer: %s", err.Error())
 		}
-	}(wg)
+	}()
 
 	wg.Wait()
 	return nil
