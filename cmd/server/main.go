@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("failed to create app: %s", err.Error())
 	}
 
-	a.Run()
+	err = a.Run()
 	if err != nil {
 		log.Fatalf("failed to create app: %s", err.Error())
 	}

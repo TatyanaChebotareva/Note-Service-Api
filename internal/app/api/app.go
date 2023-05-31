@@ -42,15 +42,9 @@ func (a *App) Run() error {
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
-	err := a.runGRPC(wg)
-	if err != nil {
-		return err
-	}
+	go a.runGRPC(wg)
 
-	err = a.runPublicHTTP(wg)
-	if err != nil {
-		return err
-	}
+	go a.runPublicHTTP(wg)
 
 	wg.Wait()
 	return nil
@@ -109,33 +103,32 @@ func (a *App) initPublicHTTPHandlers(ctx context.Context) error {
 }
 
 func (a *App) runGRPC(wg *sync.WaitGroup) error {
+	defer wg.Done()
+
 	list, err := net.Listen("tcp", a.serviceProvider.GetConfig().GRPC.GetAddress())
+
 	if err != nil {
-		return err
+		log.Printf("Failed to listen TCP on port %s: %s", a.serviceProvider.GetConfig().GRPC.GetAddress(), err.Error())
+		return nil
 	}
 
-	go func() {
-		defer wg.Done()
-
-		if err = a.grpcServer.Serve(list); err != nil {
-			log.Printf("Failed to process gRPC server: %s", err.Error())
-		}
-	}()
-
 	log.Printf("GRPC Server is listening on host: %s", a.serviceProvider.GetConfig().GRPC.GetAddress())
+
+	if err = a.grpcServer.Serve(list); err != nil {
+		log.Printf("Failed to process gRPC server: %s", err.Error())
+	}
+
 	return nil
 }
 
 func (a *App) runPublicHTTP(wg *sync.WaitGroup) error {
-
-	go func() {
-		defer wg.Done()
-
-		if err := http.ListenAndServe(a.serviceProvider.GetConfig().HTTP.GetAddress(), a.mux); err != nil {
-			log.Printf("Failed to process muxer: %s", err.Error())
-		}
-	}()
+	defer wg.Done()
 
 	log.Printf("HTTP Server is listening on host: %s ", a.serviceProvider.GetConfig().HTTP.GetAddress())
+
+	if err := http.ListenAndServe(a.serviceProvider.GetConfig().HTTP.GetAddress(), a.mux); err != nil {
+		log.Printf("Failed to process muxer: %s", err.Error())
+	}
+
 	return nil
 }

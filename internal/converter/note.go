@@ -30,6 +30,7 @@ func ToNote(note *desc.Note) *model.Note {
 
 	if note.GetUpdatedAt().IsValid() {
 		updatedAt.Time = note.GetUpdatedAt().AsTime()
+		updatedAt.Valid = true
 	}
 
 	return &model.Note{

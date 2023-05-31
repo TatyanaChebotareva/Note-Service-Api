@@ -44,7 +44,7 @@ func (r *repository) Create(ctx context.Context, noteInfo *model.NoteInfo) (int6
 	}
 
 	q := db.Query{
-		Name:     "Create",
+		Name:     "Create_note",
 		QueryRaw: query,
 	}
 
@@ -74,7 +74,7 @@ func (r *repository) Get(ctx context.Context, id int64) (*model.Note, error) {
 	}
 
 	q := db.Query{
-		Name:     "Get",
+		Name:     "Get_note",
 		QueryRaw: query,
 	}
 
@@ -98,7 +98,7 @@ func (r *repository) GetList(ctx context.Context) ([]*model.Note, error) {
 	}
 
 	q := db.Query{
-		Name:     "GetList",
+		Name:     "GetList_note",
 		QueryRaw: query,
 	}
 
@@ -122,7 +122,7 @@ func (r *repository) Delete(ctx context.Context, id int64) error {
 	}
 
 	q := db.Query{
-		Name:     "Delete",
+		Name:     "Delete_note",
 		QueryRaw: query,
 	}
 
@@ -156,7 +156,7 @@ func (r *repository) Update(ctx context.Context, req *model.UpdateNoteInfo) erro
 	}
 
 	q := db.Query{
-		Name:     "Update",
+		Name:     "Update_note",
 		QueryRaw: query,
 	}
 

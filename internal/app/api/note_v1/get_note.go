@@ -3,6 +3,7 @@ package note_v1
 import (
 	"context"
 
+	"github.com/TatyanaChebotareva/Note-Service-Api/internal/converter"
 	desc "github.com/TatyanaChebotareva/Note-Service-Api/pkg/note_v1"
 )
 
@@ -12,5 +13,7 @@ func (n *Note) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse
 		return nil, err
 	}
 
-	return res, nil
+	return &desc.GetResponse{
+		Note: converter.ToDescNote(res),
+	}, nil
 }
