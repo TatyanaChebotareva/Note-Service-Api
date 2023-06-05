@@ -55,3 +55,8 @@ PHONY: .vendor-proto
   					mv vendor.protogen/protobuf/src/google/protobuf/*.proto vendor.protogen/google/protobuf/ &&\
                     rm -rf vendor.protogen/protobuf ;\
                 fi
+
+
+.PHONY: test-coverage
+test-coverage:
+	go test ./... -coverprofile=coverage.out && go tool cover -func=coverage.out
