@@ -2,7 +2,6 @@ package note_v1
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"testing"
 
@@ -23,41 +22,14 @@ func TestUpdateNote(t *testing.T) {
 
 		id = gofakeit.Int64()
 
-		valid = true
-
-		title  = gofakeit.BeerName()
-		text   = gofakeit.BeerStyle()
-		author = gofakeit.Name()
-
-		req = &desc.UpdateRequest{
-			Note: &desc.UpdateNoteInfo{
-				Id: id,
-				Title: &wrapperspb.StringValue{
-					Value: title,
-				},
-				Text: &wrapperspb.StringValue{
-					Value: text,
-				},
-				Author: &wrapperspb.StringValue{
-					Value: author,
-				},
-			},
-		}
-
-		repoReq = &model.UpdateNoteInfo{
-			Id: id,
-			Title: sql.NullString{
-				String: title,
-				Valid:  valid,
-			},
-			Text: sql.NullString{
-				String: text,
-				Valid:  valid,
-			},
-			Author: sql.NullString{
-				String: author,
-				Valid:  valid,
-			},
+		tests = map[string]struct {
+			title  string
+			text   string
+			author string
+		}{
+			"correct data": {gofakeit.BeerName(), gofakeit.BeerStyle(), gofakeit.Name()},
+			"one nullable": {"", gofakeit.BeerStyle(), gofakeit.Name()},
+			"all nullable": {"", "", ""},
 		}
 
 		repoErrText = gofakeit.Phrase()
@@ -65,24 +37,51 @@ func TestUpdateNote(t *testing.T) {
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
-	gomock.InOrder(
-		noteMock.EXPECT().Update(ctx, repoReq).Return(nil),
-		noteMock.EXPECT().Update(ctx, repoReq).Return(repoErr),
-	)
 
 	api := newMockNoteV1(Note{
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		// fmt.Println(req.GetId())
-		_, err := api.Update(ctx, req)
-		require.Nil(t, err)
-	})
+	for name, tc := range tests {
+		req := &desc.UpdateRequest{
+			Note: &desc.UpdateNoteInfo{
+				Id: id,
+			},
+		}
 
-	t.Run("note repo err", func(t *testing.T) {
-		_, err := api.Update(ctx, req)
-		require.NotNil(t, err)
-		require.Equal(t, repoErrText, err.Error())
-	})
+		repoReq := &model.UpdateNoteInfo{
+			Id: id,
+		}
+
+		if tc.title != "" {
+			req.GetNote().Title = &wrapperspb.StringValue{Value: tc.title}
+			repoReq.Title.String = tc.title
+			repoReq.Title.Valid = true
+		}
+
+		if tc.text != "" {
+			req.GetNote().Text = &wrapperspb.StringValue{Value: tc.text}
+			repoReq.Text.String = tc.text
+			repoReq.Text.Valid = true
+		}
+
+		if tc.author != "" {
+			req.GetNote().Author = &wrapperspb.StringValue{Value: tc.author}
+			repoReq.Author.String = tc.author
+			repoReq.Author.Valid = true
+		}
+
+		t.Run("success case "+name, func(t *testing.T) {
+			noteMock.EXPECT().Update(ctx, repoReq).Return(nil)
+			_, err := api.Update(ctx, req)
+			require.Nil(t, err)
+		})
+
+		t.Run("note repo err "+name, func(t *testing.T) {
+			noteMock.EXPECT().Update(ctx, repoReq).Return(repoErr)
+			_, err := api.Update(ctx, req)
+			require.NotNil(t, err)
+			require.Equal(t, repoErrText, err.Error())
+		})
+	}
 }
