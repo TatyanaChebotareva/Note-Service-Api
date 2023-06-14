@@ -15,3 +15,10 @@ func NewNote(noteService *note.Service) *Note {
 		noteService: noteService,
 	}
 }
+
+func newMockNoteV1(i Note) *Note {
+	return &Note{
+		desc.UnimplementedNoteV1Server{},
+		i.noteService,
+	}
+}

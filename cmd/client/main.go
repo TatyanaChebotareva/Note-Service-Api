@@ -23,10 +23,10 @@ func main() {
 	client := desc.NewNoteV1Client(con)
 
 	// createNote(client)
-	getNote(client)
+	// getNote(client)
 	// getListNote(client)
 	// updateNote(client)
-	// deleteNote(client)
+	deleteNote(client)
 }
 
 func createNote(client desc.NoteV1Client) {
@@ -102,7 +102,7 @@ func updateNote(client desc.NoteV1Client) {
 
 func deleteNote(client desc.NoteV1Client) {
 	_, err := client.Delete(context.Background(), &desc.DeleteRequest{
-		Id: 4,
+		Id: -78,
 	})
 
 	if err != nil {

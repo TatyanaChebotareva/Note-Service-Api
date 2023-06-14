@@ -13,3 +13,16 @@ func NewService(noteRepository note.Repository) *Service {
 		noteRepository: noteRepository,
 	}
 }
+
+func NewMockNoteService(deps ...interface{}) *Service {
+	is := Service{}
+
+	for _, v := range deps {
+		switch s := v.(type) {
+		case note.Repository:
+			is.noteRepository = s
+		}
+	}
+
+	return &is
+}
