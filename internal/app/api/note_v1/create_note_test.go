@@ -19,21 +19,24 @@ func TestCreateNote(t *testing.T) {
 		ctx      = context.Background()
 		mockCtrl = gomock.NewController(t)
 
-		id = gofakeit.Int64()
-
 		title  = gofakeit.BeerName()
 		text   = gofakeit.BeerStyle()
 		author = gofakeit.Name()
 
+		id = gofakeit.Int64()
+
 		repoErrText = gofakeit.Phrase()
-		repoErr     = errors.New(repoErrText)
 
 		tests = []struct {
+			testName string
 			req      *desc.CreateRequest
 			repoReq  *model.NoteInfo
 			validRes *desc.CreateResponse
+			repoRes  int64
+			error    error
 		}{
 			{
+				testName: "success case",
 				req: &desc.CreateRequest{
 					Note: &desc.NoteInfo{
 						Title:  title,
@@ -49,6 +52,26 @@ func TestCreateNote(t *testing.T) {
 				validRes: &desc.CreateResponse{
 					Id: id,
 				},
+				repoRes: id,
+				error:   nil,
+			},
+			{
+				testName: "failed case",
+				req: &desc.CreateRequest{
+					Note: &desc.NoteInfo{
+						Title:  title,
+						Text:   text,
+						Author: author,
+					},
+				},
+				repoReq: &model.NoteInfo{
+					Title:  title,
+					Text:   text,
+					Author: author,
+				},
+				validRes: nil,
+				repoRes:  int64(0),
+				error:    errors.New(repoErrText),
 			},
 		}
 	)
@@ -59,21 +82,17 @@ func TestCreateNote(t *testing.T) {
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Create(ctx, tc.repoReq).Return(id, nil)
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			noteMock.EXPECT().Create(ctx, tc.repoReq).Return(tc.repoRes, tc.error)
 			res, err := api.Create(ctx, tc.req)
-			require.Equal(t, tc.validRes, res)
-			require.Nil(t, err)
-		}
-	})
-
-	t.Run("note repo err", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Create(ctx, tc.repoReq).Return(int64(0), repoErr)
-			_, err := api.Create(ctx, tc.req)
-			require.NotNil(t, err)
-			require.Equal(t, repoErrText, err.Error())
-		}
-	})
+			if tc.error == nil {
+				require.Equal(t, tc.validRes, res)
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+				require.Equal(t, repoErrText, err.Error())
+			}
+		})
+	}
 }

@@ -3,7 +3,6 @@ package note_v1
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	noteMocks "github.com/TatyanaChebotareva/Note-Service-Api/internal/repository/note/mocks"
@@ -19,20 +18,29 @@ func TestDeleteNote(t *testing.T) {
 		ctx      = context.Background()
 		mockCtrl = gomock.NewController(t)
 
-		id = gofakeit.Int64()
+		id          = gofakeit.Int64()
+		repoErrText = gofakeit.Phrase()
 
 		tests = []struct {
-			req *desc.DeleteRequest
+			testName string
+			req      *desc.DeleteRequest
+			error    error
 		}{
 			{
+				testName: "success case",
 				req: &desc.DeleteRequest{
 					Id: id,
 				},
+				error: nil,
+			},
+			{
+				testName: "failed case",
+				req: &desc.DeleteRequest{
+					Id: id,
+				},
+				error: errors.New(repoErrText),
 			},
 		}
-
-		repoErrText = gofakeit.Phrase()
-		repoErr     = errors.New(repoErrText)
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
@@ -41,21 +49,16 @@ func TestDeleteNote(t *testing.T) {
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Delete(ctx, id).Return(nil)
-			fmt.Println(tc.req.GetId())
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			noteMock.EXPECT().Delete(ctx, id).Return(tc.error)
 			_, err := api.Delete(ctx, tc.req)
-			require.Nil(t, err)
-		}
-	})
-
-	t.Run("note repo err", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Delete(ctx, id).Return(repoErr)
-			_, err := api.Delete(ctx, tc.req)
-			require.NotNil(t, err)
-			require.Equal(t, repoErrText, err.Error())
-		}
-	})
+			if tc.error == nil {
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+				require.Equal(t, repoErrText, err.Error())
+			}
+		})
+	}
 }

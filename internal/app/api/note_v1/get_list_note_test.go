@@ -18,8 +18,10 @@ import (
 )
 
 type testCase struct {
+	testName  string
 	validRes  *desc.GetListResponse
 	repoNotes []*model.Note
+	error     error
 }
 
 func TestGetListNote(t *testing.T) {
@@ -28,10 +30,8 @@ func TestGetListNote(t *testing.T) {
 		mockCtrl = gomock.NewController(t)
 
 		repoErrText = gofakeit.Phrase()
-		repoErr     = errors.New(repoErrText)
 
 		noteCnt = 3
-		testCnt = 2
 
 		repoNotes  = make([]*model.Note, 0, noteCnt)
 		validNotes = make([]*desc.Note, 0, noteCnt)
@@ -39,49 +39,58 @@ func TestGetListNote(t *testing.T) {
 		tests []testCase
 	)
 
-	// cycle for test data generation
-	for j := 0; j < testCnt; j++ {
-		testCase := new(testCase)
-		for i := 0; i < noteCnt; i++ {
-			id := gofakeit.Int64()
-			title := gofakeit.BeerName()
-			text := gofakeit.BeerStyle()
-			author := gofakeit.Name()
-			createdAt := gofakeit.Date()
-			updatedAt := gofakeit.Date()
+	// cycle for success test data generation
+	for i := 0; i < noteCnt; i++ {
+		id := gofakeit.Int64()
+		title := gofakeit.BeerName()
+		text := gofakeit.BeerStyle()
+		author := gofakeit.Name()
+		createdAt := gofakeit.Date()
+		updatedAt := gofakeit.Date()
 
-			validNotes = append(validNotes, &desc.Note{
-				Id: id,
-				NoteInfo: &desc.NoteInfo{
-					Title:  title,
-					Text:   text,
-					Author: author,
-				},
-				CreatedAt: timestamppb.New(createdAt),
-				UpdatedAt: timestamppb.New(updatedAt),
-			})
+		validNotes = append(validNotes, &desc.Note{
+			Id: id,
+			NoteInfo: &desc.NoteInfo{
+				Title:  title,
+				Text:   text,
+				Author: author,
+			},
+			CreatedAt: timestamppb.New(createdAt),
+			UpdatedAt: timestamppb.New(updatedAt),
+		})
 
-			repoNotes = append(repoNotes, &model.Note{
-				Id: id,
-				Info: &model.NoteInfo{
-					Title:  title,
-					Text:   text,
-					Author: author,
-				},
-				CreatedAt: createdAt,
-				UpdatedAt: sql.NullTime{
-					Time:  updatedAt,
-					Valid: true,
-				},
-			})
-		}
-		validRes := &desc.GetListResponse{
-			NoteList: validNotes,
-		}
-		testCase.validRes = validRes
-		testCase.repoNotes = repoNotes
-		tests = append(tests, *testCase)
+		repoNotes = append(repoNotes, &model.Note{
+			Id: id,
+			Info: &model.NoteInfo{
+				Title:  title,
+				Text:   text,
+				Author: author,
+			},
+			CreatedAt: createdAt,
+			UpdatedAt: sql.NullTime{
+				Time:  updatedAt,
+				Valid: true,
+			},
+		})
 	}
+
+	validRes := &desc.GetListResponse{
+		NoteList: validNotes,
+	}
+
+	tests = append(tests, testCase{
+		testName:  "success case",
+		validRes:  validRes,
+		repoNotes: repoNotes,
+		error:     nil,
+	})
+
+	tests = append(tests, testCase{
+		testName:  "failed case",
+		validRes:  nil,
+		repoNotes: nil,
+		error:     errors.New(repoErrText),
+	})
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
 
@@ -89,19 +98,17 @@ func TestGetListNote(t *testing.T) {
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().GetList(ctx).Return(tc.repoNotes, nil)
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			noteMock.EXPECT().GetList(ctx).Return(tc.repoNotes, tc.error)
 			res, err := api.GetList(ctx, &emptypb.Empty{})
-			require.Equal(t, tc.validRes, res)
-			require.Nil(t, err)
-		}
-	})
-
-	t.Run("note repo err", func(t *testing.T) {
-		noteMock.EXPECT().GetList(ctx).Return(nil, repoErr)
-		_, err := api.GetList(ctx, &emptypb.Empty{})
-		require.NotNil(t, err)
-		require.Equal(t, repoErrText, err.Error())
-	})
+			if tc.error == nil {
+				require.Equal(t, tc.validRes, res)
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+				require.Equal(t, repoErrText, err.Error())
+			}
+		})
+	}
 }

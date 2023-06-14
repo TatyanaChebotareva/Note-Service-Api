@@ -29,12 +29,17 @@ func TestGetNote(t *testing.T) {
 		createdAt = gofakeit.Date()
 		updatedAt = gofakeit.Date()
 
+		repoErrText = gofakeit.Phrase()
+
 		tests = []struct {
+			testName string
 			req      *desc.GetRequest
 			validRes *desc.GetResponse
 			repoRes  *model.Note
+			error    error
 		}{
 			{
+				testName: "success case",
 				req: &desc.GetRequest{
 					Id: id,
 				},
@@ -65,11 +70,18 @@ func TestGetNote(t *testing.T) {
 						Valid: true,
 					},
 				},
+				error: nil,
+			},
+			{
+				testName: "failed case",
+				req: &desc.GetRequest{
+					Id: id,
+				},
+				validRes: nil,
+				repoRes:  nil,
+				error:    errors.New(repoErrText),
 			},
 		}
-
-		repoErrText = gofakeit.Phrase()
-		repoErr     = errors.New(repoErrText)
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
@@ -78,21 +90,17 @@ func TestGetNote(t *testing.T) {
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Get(ctx, id).Return(tc.repoRes, nil)
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			noteMock.EXPECT().Get(ctx, id).Return(tc.repoRes, tc.error)
 			res, err := api.Get(ctx, tc.req)
-			require.Equal(t, tc.validRes, res)
-			require.Nil(t, err)
-		}
-	})
-
-	t.Run("note repo err", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Get(ctx, id).Return(nil, repoErr)
-			_, err := api.Get(ctx, tc.req)
-			require.NotNil(t, err)
-			require.Equal(t, repoErrText, err.Error())
-		}
-	})
+			if tc.error == nil {
+				require.Equal(t, tc.validRes, res)
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+				require.Equal(t, repoErrText, err.Error())
+			}
+		})
+	}
 }

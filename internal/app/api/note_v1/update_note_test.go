@@ -23,17 +23,19 @@ func TestUpdateNote(t *testing.T) {
 
 		id = gofakeit.Int64()
 
-		title  = gofakeit.BeerName()
-		text   = gofakeit.BeerStyle()
-		author = gofakeit.Name()
+		title       = gofakeit.BeerName()
+		text        = gofakeit.BeerStyle()
+		author      = gofakeit.Name()
+		repoErrText = gofakeit.Phrase()
 
 		tests = []struct {
 			testName string
 			req      *desc.UpdateRequest
 			repoReq  *model.UpdateNoteInfo
+			error    error
 		}{
 			{
-				testName: "correct data",
+				testName: "success case correct data",
 				req: &desc.UpdateRequest{
 					Note: &desc.UpdateNoteInfo{
 						Id:     id,
@@ -57,9 +59,10 @@ func TestUpdateNote(t *testing.T) {
 						Valid:  true,
 					},
 				},
+				error: nil,
 			},
 			{
-				testName: "one nullable",
+				testName: "success case one nullable",
 				req: &desc.UpdateRequest{
 					Note: &desc.UpdateNoteInfo{
 						Id:     id,
@@ -83,9 +86,10 @@ func TestUpdateNote(t *testing.T) {
 						Valid:  true,
 					},
 				},
+				error: nil,
 			},
 			{
-				testName: "all nullable",
+				testName: "success case all nullable",
 				req: &desc.UpdateRequest{
 					Note: &desc.UpdateNoteInfo{
 						Id:     id,
@@ -109,11 +113,36 @@ func TestUpdateNote(t *testing.T) {
 						Valid:  false,
 					},
 				},
+				error: nil,
+			},
+			{
+				testName: "failed case",
+				req: &desc.UpdateRequest{
+					Note: &desc.UpdateNoteInfo{
+						Id:     id,
+						Title:  nil,
+						Text:   nil,
+						Author: nil,
+					},
+				},
+				repoReq: &model.UpdateNoteInfo{
+					Id: id,
+					Title: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+					Text: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+					Author: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
+				error: errors.New(repoErrText),
 			},
 		}
-
-		repoErrText = gofakeit.Phrase()
-		repoErr     = errors.New(repoErrText)
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
@@ -122,20 +151,16 @@ func TestUpdateNote(t *testing.T) {
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
-	t.Run("success case", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Update(ctx, tc.repoReq).Return(nil)
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			noteMock.EXPECT().Update(ctx, tc.repoReq).Return(tc.error)
 			_, err := api.Update(ctx, tc.req)
-			require.Nil(t, err)
-		}
-	})
-
-	t.Run("note repo err ", func(t *testing.T) {
-		for _, tc := range tests {
-			noteMock.EXPECT().Update(ctx, tc.repoReq).Return(repoErr)
-			_, err := api.Update(ctx, tc.req)
-			require.NotNil(t, err)
-			require.Equal(t, repoErrText, err.Error())
-		}
-	})
+			if tc.error == nil {
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+				require.Equal(t, repoErrText, err.Error())
+			}
+		})
+	}
 }
