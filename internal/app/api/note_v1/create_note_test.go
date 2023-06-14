@@ -26,48 +26,54 @@ func TestCreateNote(t *testing.T) {
 		author = gofakeit.Name()
 
 		repoErrText = gofakeit.Phrase()
+		repoErr     = errors.New(repoErrText)
 
-		req = &desc.CreateRequest{
-			Note: &desc.NoteInfo{
-				Title:  title,
-				Text:   text,
-				Author: author,
+		tests = []struct {
+			req      *desc.CreateRequest
+			repoReq  *model.NoteInfo
+			validRes *desc.CreateResponse
+		}{
+			{
+				req: &desc.CreateRequest{
+					Note: &desc.NoteInfo{
+						Title:  title,
+						Text:   text,
+						Author: author,
+					},
+				},
+				repoReq: &model.NoteInfo{
+					Title:  title,
+					Text:   text,
+					Author: author,
+				},
+				validRes: &desc.CreateResponse{
+					Id: id,
+				},
 			},
 		}
-
-		repoReq = &model.NoteInfo{
-			Title:  title,
-			Text:   text,
-			Author: author,
-		}
-
-		validRes = &desc.CreateResponse{
-			Id: id,
-		}
-
-		repoErr = errors.New(repoErrText)
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
-	gomock.InOrder(
-		noteMock.EXPECT().Create(ctx, repoReq).Return(id, nil),
-		noteMock.EXPECT().Create(ctx, repoReq).Return(int64(0), repoErr),
-	)
 
 	api := newMockNoteV1(Note{
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
 	t.Run("success case", func(t *testing.T) {
-		// fmt.Println(req.GetNote().GetTitle(), ";", req.GetNote().GetText(), ";", req.GetNote().GetAuthor())
-		res, err := api.Create(ctx, req)
-		require.Equal(t, validRes, res)
-		require.Nil(t, err)
+		for _, tc := range tests {
+			noteMock.EXPECT().Create(ctx, tc.repoReq).Return(id, nil)
+			res, err := api.Create(ctx, tc.req)
+			require.Equal(t, tc.validRes, res)
+			require.Nil(t, err)
+		}
 	})
 
 	t.Run("note repo err", func(t *testing.T) {
-		_, err := api.Create(ctx, req)
-		require.NotNil(t, err)
-		require.Equal(t, repoErrText, err.Error())
+		for _, tc := range tests {
+			noteMock.EXPECT().Create(ctx, tc.repoReq).Return(int64(0), repoErr)
+			_, err := api.Create(ctx, tc.req)
+			require.NotNil(t, err)
+			require.Equal(t, repoErrText, err.Error())
+		}
 	})
 }

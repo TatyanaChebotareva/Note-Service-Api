@@ -29,36 +29,42 @@ func TestGetNote(t *testing.T) {
 		createdAt = gofakeit.Date()
 		updatedAt = gofakeit.Date()
 
-		valid = true
-
-		req = &desc.GetRequest{
-			Id: id,
-		}
-
-		validRes = &desc.GetResponse{
-			Note: &desc.Note{
-				Id: id,
-				NoteInfo: &desc.NoteInfo{
-					Title:  title,
-					Text:   text,
-					Author: author,
+		tests = []struct {
+			req      *desc.GetRequest
+			validRes *desc.GetResponse
+			repoRes  *model.Note
+		}{
+			{
+				req: &desc.GetRequest{
+					Id: id,
 				},
-				CreatedAt: timestamppb.New(createdAt),
-				UpdatedAt: timestamppb.New(updatedAt),
-			},
-		}
 
-		repoRes = &model.Note{
-			Id: id,
-			Info: &model.NoteInfo{
-				Title:  title,
-				Text:   text,
-				Author: author,
-			},
-			CreatedAt: createdAt,
-			UpdatedAt: sql.NullTime{
-				Time:  updatedAt,
-				Valid: valid,
+				validRes: &desc.GetResponse{
+					Note: &desc.Note{
+						Id: id,
+						NoteInfo: &desc.NoteInfo{
+							Title:  title,
+							Text:   text,
+							Author: author,
+						},
+						CreatedAt: timestamppb.New(createdAt),
+						UpdatedAt: timestamppb.New(updatedAt),
+					},
+				},
+
+				repoRes: &model.Note{
+					Id: id,
+					Info: &model.NoteInfo{
+						Title:  title,
+						Text:   text,
+						Author: author,
+					},
+					CreatedAt: createdAt,
+					UpdatedAt: sql.NullTime{
+						Time:  updatedAt,
+						Valid: true,
+					},
+				},
 			},
 		}
 
@@ -67,25 +73,26 @@ func TestGetNote(t *testing.T) {
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
-	gomock.InOrder(
-		noteMock.EXPECT().Get(ctx, id).Return(repoRes, nil),
-		noteMock.EXPECT().Get(ctx, id).Return(nil, repoErr),
-	)
 
 	api := newMockNoteV1(Note{
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
 	t.Run("success case", func(t *testing.T) {
-		// fmt.Println(req.GetId())
-		res, err := api.Get(ctx, req)
-		require.Equal(t, validRes, res)
-		require.Nil(t, err)
+		for _, tc := range tests {
+			noteMock.EXPECT().Get(ctx, id).Return(tc.repoRes, nil)
+			res, err := api.Get(ctx, tc.req)
+			require.Equal(t, tc.validRes, res)
+			require.Nil(t, err)
+		}
 	})
 
 	t.Run("note repo err", func(t *testing.T) {
-		_, err := api.Get(ctx, req)
-		require.NotNil(t, err)
-		require.Equal(t, repoErrText, err.Error())
+		for _, tc := range tests {
+			noteMock.EXPECT().Get(ctx, id).Return(nil, repoErr)
+			_, err := api.Get(ctx, tc.req)
+			require.NotNil(t, err)
+			require.Equal(t, repoErrText, err.Error())
+		}
 	})
 }

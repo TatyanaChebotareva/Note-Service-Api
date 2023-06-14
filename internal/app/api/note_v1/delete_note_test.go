@@ -21,8 +21,14 @@ func TestDeleteNote(t *testing.T) {
 
 		id = gofakeit.Int64()
 
-		req = &desc.DeleteRequest{
-			Id: id,
+		tests = []struct {
+			req *desc.DeleteRequest
+		}{
+			{
+				req: &desc.DeleteRequest{
+					Id: id,
+				},
+			},
 		}
 
 		repoErrText = gofakeit.Phrase()
@@ -30,24 +36,26 @@ func TestDeleteNote(t *testing.T) {
 	)
 
 	noteMock := noteMocks.NewMockRepository(mockCtrl)
-	gomock.InOrder(
-		noteMock.EXPECT().Delete(ctx, id).Return(nil),
-		noteMock.EXPECT().Delete(ctx, id).Return(repoErr),
-	)
 
 	api := newMockNoteV1(Note{
 		noteService: note.NewMockNoteService(noteMock),
 	})
 
 	t.Run("success case", func(t *testing.T) {
-		fmt.Println(req.GetId())
-		_, err := api.Delete(ctx, req)
-		require.Nil(t, err)
+		for _, tc := range tests {
+			noteMock.EXPECT().Delete(ctx, id).Return(nil)
+			fmt.Println(tc.req.GetId())
+			_, err := api.Delete(ctx, tc.req)
+			require.Nil(t, err)
+		}
 	})
 
 	t.Run("note repo err", func(t *testing.T) {
-		_, err := api.Delete(ctx, req)
-		require.NotNil(t, err)
-		require.Equal(t, repoErrText, err.Error())
+		for _, tc := range tests {
+			noteMock.EXPECT().Delete(ctx, id).Return(repoErr)
+			_, err := api.Delete(ctx, tc.req)
+			require.NotNil(t, err)
+			require.Equal(t, repoErrText, err.Error())
+		}
 	})
 }
